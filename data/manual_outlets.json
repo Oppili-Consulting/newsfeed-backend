@@ -56,12 +56,36 @@
   "feed": "https://www.smh.com.au/rss/feed.xml"
  },
  {
+  "id": "bi-iwacu",
+  "name": "Iwacu",
+  "country": "BI",
+  "lang": "fr",
+  "site": "https://www.iwacu-burundi.org",
+  "feed": "https://www.iwacu-burundi.org/feed/"
+ },
+ {
   "id": "folha",
   "name": "Folha de S.Paulo",
   "country": "BR",
   "lang": "pt",
   "site": "https://www.folha.uol.com.br",
   "feed": "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"
+ },
+ {
+  "id": "bw-sundaystandard",
+  "name": "Sunday Standard",
+  "country": "BW",
+  "lang": "en",
+  "site": "https://www.sundaystandard.info",
+  "feed": "https://www.sundaystandard.info/feed/"
+ },
+ {
+  "id": "bz-bbn",
+  "name": "Breaking Belize News",
+  "country": "BZ",
+  "lang": "en",
+  "site": "https://www.breakingbelizenews.com",
+  "feed": "https://www.breakingbelizenews.com/feed/"
  },
  {
   "id": "radio-canada",
@@ -72,12 +96,28 @@
   "feed": "https://ici.radio-canada.ca/rss/4159"
  },
  {
+  "id": "cf-corbeaunews",
+  "name": "Corbeau News Centrafrique",
+  "country": "CF",
+  "lang": "fr",
+  "site": "https://corbeaunews-centrafrique.org",
+  "feed": "https://corbeaunews-centrafrique.org/feed/"
+ },
+ {
   "id": "srf",
   "name": "SRF News",
   "country": "CH",
   "lang": "de",
   "site": "https://www.srf.ch",
   "feed": "https://www.srf.ch/news/bnf/rss/1646"
+ },
+ {
+  "id": "cy-cyprusmail",
+  "name": "Cyprus Mail",
+  "country": "CY",
+  "lang": "en",
+  "site": "https://cyprus-mail.com",
+  "feed": "https://cyprus-mail.com/feed/"
  },
  {
   "id": "ct24",
@@ -121,12 +161,28 @@
   "feed": "https://www.dr.dk/nyheder/service/feeds/allenyheder"
  },
  {
+  "id": "dm-dno",
+  "name": "Dominica News Online",
+  "country": "DM",
+  "lang": "en",
+  "site": "https://dominicanewsonline.com",
+  "feed": "https://dominicanewsonline.com/news/feed/"
+ },
+ {
   "id": "egypt-independent",
   "name": "Egypt Independent",
   "country": "EG",
   "lang": "en",
   "site": "https://egyptindependent.com",
   "feed": "https://egyptindependent.com/feed/"
+ },
+ {
+  "id": "er-shabait",
+  "name": "Shabait",
+  "country": "ER",
+  "lang": "en",
+  "site": "https://shabait.com",
+  "feed": "https://shabait.com/feed/"
  },
  {
   "id": "el-pais",
@@ -200,6 +256,22 @@
   "lang": "en",
   "site": "https://www.independent.co.uk",
   "feed": "https://www.independent.co.uk/news/rss"
+ },
+ {
+  "id": "gd-nowgrenada",
+  "name": "Now Grenada",
+  "country": "GD",
+  "lang": "en",
+  "site": "https://www.nowgrenada.com",
+  "feed": "https://www.nowgrenada.com/feed/"
+ },
+ {
+  "id": "gd-thenewtoday",
+  "name": "The New Today",
+  "country": "GD",
+  "lang": "en",
+  "site": "https://thenewtoday.gd",
+  "feed": "https://thenewtoday.gd/feed/"
  },
  {
   "id": "civil-ge",
@@ -290,6 +362,22 @@
   "feed": "https://www.japantimes.co.jp/feed/"
  },
  {
+  "id": "kn-sknnnews",
+  "name": "SKN News",
+  "country": "KN",
+  "lang": "en",
+  "site": "https://sknnews.com",
+  "feed": "https://sknnews.com/feed/"
+ },
+ {
+  "id": "kn-winnfm",
+  "name": "WINN FM",
+  "country": "KN",
+  "lang": "en",
+  "site": "https://www.winnfm.com",
+  "feed": "https://www.winnfm.com/feed/"
+ },
+ {
   "id": "astana-times",
   "name": "The Astana Times",
   "country": "KZ",
@@ -298,12 +386,92 @@
   "feed": "https://astanatimes.com/feed/"
  },
  {
+  "id": "lc-stluciatimes",
+  "name": "St Lucia Times",
+  "country": "LC",
+  "lang": "en",
+  "site": "https://stluciatimes.com",
+  "feed": "https://stluciatimes.com/feed/"
+ },
+ {
+  "id": "lr-frontpageafrica",
+  "name": "FrontPage Africa",
+  "country": "LR",
+  "lang": "en",
+  "site": "https://frontpageafricaonline.com",
+  "feed": "https://frontpageafricaonline.com/feed/"
+ },
+ {
+  "id": "lr-thenewdawn",
+  "name": "The New Dawn",
+  "country": "LR",
+  "lang": "en",
+  "site": "https://thenewdawnliberia.com",
+  "feed": "https://thenewdawnliberia.com/feed/"
+ },
+ {
+  "id": "mc-monacolife",
+  "name": "Monaco Life",
+  "country": "MC",
+  "lang": "en",
+  "site": "https://monacolife.net",
+  "feed": "https://monacolife.net/feed/"
+ },
+ {
+  "id": "mc-monacotribune",
+  "name": "Monaco Tribune",
+  "country": "MC",
+  "lang": "fr",
+  "site": "https://www.monaco-tribune.com",
+  "feed": "https://www.monaco-tribune.com/feed/"
+ },
+ {
   "id": "irrawaddy",
   "name": "The Irrawaddy",
   "country": "MM",
   "lang": "en",
   "site": "https://www.irrawaddy.com",
   "feed": "https://www.irrawaddy.com/feed"
+ },
+ {
+  "id": "mu-defimedia",
+  "name": "Defi Media",
+  "country": "MU",
+  "lang": "fr",
+  "site": "https://defimedia.info",
+  "feed": "https://defimedia.info/rss.xml"
+ },
+ {
+  "id": "mu-lemauricien",
+  "name": "Le Mauricien",
+  "country": "MU",
+  "lang": "fr",
+  "site": "https://www.lemauricien.com",
+  "feed": "https://www.lemauricien.com/feed/"
+ },
+ {
+  "id": "mw-malawi24",
+  "name": "Malawi24",
+  "country": "MW",
+  "lang": "en",
+  "site": "https://malawi24.com",
+  "feed": "https://malawi24.com/feed/"
+ },
+ {
+  "id": "mw-nyasatimes",
+  "name": "Nyasa Times",
+  "country": "MW",
+  "lang": "en",
+  "site": "https://www.nyasatimes.com",
+  "feed": "https://www.nyasatimes.com/feed/"
+ },
+ {
+  "id": "mw-mwnation",
+  "name": "The Nation",
+  "country": "MW",
+  "lang": "en",
+  "site": "https://mwnation.com",
+  "feed": "https://mwnation.com/feed/"
  },
  {
   "id": "punch-ng",
@@ -427,12 +595,60 @@
   "feed": "https://www.straitstimes.com/news/world/rss.xml"
  },
  {
+  "id": "sl-sierraleonetelegraph",
+  "name": "Sierra Leone Telegraph",
+  "country": "SL",
+  "lang": "en",
+  "site": "https://www.thesierraleonetelegraph.com",
+  "feed": "https://www.thesierraleonetelegraph.com/feed/"
+ },
+ {
+  "id": "sm-rtv2",
+  "name": "San Marino RTV",
+  "country": "SM",
+  "lang": "it",
+  "site": "https://www.sanmarinortv.sm",
+  "feed": "https://www.sanmarinortv.sm/rss.xml"
+ },
+ {
   "id": "le-soleil-sn",
   "name": "Le Soleil (Senegal)",
   "country": "SN",
   "lang": "fr",
   "site": "https://lesoleil.sn",
   "feed": "https://lesoleil.sn/feed/"
+ },
+ {
+  "id": "td-alwihda2",
+  "name": "Alwihda Info",
+  "country": "TD",
+  "lang": "fr",
+  "site": "https://www.alwihdainfo.com",
+  "feed": "https://www.alwihdainfo.com/feed/"
+ },
+ {
+  "id": "td-tchadinfos",
+  "name": "Tchadinfos",
+  "country": "TD",
+  "lang": "fr",
+  "site": "https://tchadinfos.com",
+  "feed": "https://tchadinfos.com/feed/"
+ },
+ {
+  "id": "to-kanivatonga",
+  "name": "Kaniva Tonga",
+  "country": "TO",
+  "lang": "en",
+  "site": "https://kanivatonga.co.nz",
+  "feed": "https://kanivatonga.co.nz/feed/"
+ },
+ {
+  "id": "to-matangitonga",
+  "name": "Matangi Tonga",
+  "country": "TO",
+  "lang": "en",
+  "site": "https://matangitonga.to",
+  "feed": "https://matangitonga.to/rss.xml"
  },
  {
   "id": "daily-sabah",
@@ -481,5 +697,21 @@
   "lang": "en",
   "site": "https://www.washingtonpost.com",
   "feed": "https://feeds.washingtonpost.com/rss/world"
+ },
+ {
+  "id": "vc-iwnsvg",
+  "name": "iWitness News",
+  "country": "VC",
+  "lang": "en",
+  "site": "https://www.iwnsvg.com",
+  "feed": "https://www.iwnsvg.com/feed/"
+ },
+ {
+  "id": "vc-searchlight",
+  "name": "Searchlight",
+  "country": "VC",
+  "lang": "en",
+  "site": "https://searchlight.vc",
+  "feed": "https://searchlight.vc/feed/"
  }
 ]

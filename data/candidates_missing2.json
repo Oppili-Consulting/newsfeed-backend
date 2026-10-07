@@ -1,0 +1,22 @@
+[
+ {"id":"bw-mmegi2","name":"Mmegi Online","country":"BW","lang":"en","site":"https://www.mmegi.bw","feed":"https://www.mmegi.bw/feed/"},
+ {"id":"bw-mmegi3","name":"Mmegi Online","country":"BW","lang":"en","site":"https://www.mmegi.bw","feed":"https://www.mmegi.bw/rss.xml"},
+ {"id":"bw-voice2","name":"The Voice","country":"BW","lang":"en","site":"https://www.thevoicebw.com","feed":"https://www.thevoicebw.com/rss"},
+ {"id":"cy-kathimerini2","name":"Kathimerini Cyprus","country":"CY","lang":"en","site":"https://knews.kathimerini.com.cy","feed":"https://knews.kathimerini.com.cy/en/rss"},
+ {"id":"er-tesfanews2","name":"TesfaNews","country":"ER","lang":"en","site":"https://tesfanews.net","feed":"https://tesfanews.net/rss"},
+ {"id":"gq-press2","name":"Guinea Ecuatorial Press","country":"GQ","lang":"es","site":"https://www.guineaecuatorialpress.com","feed":"https://www.guineaecuatorialpress.com/feed/"},
+ {"id":"sm-rtv2","name":"San Marino RTV","country":"SM","lang":"it","site":"https://www.sanmarinortv.sm","feed":"https://www.sanmarinortv.sm/rss.xml"},
+ {"id":"sm-rtv3","name":"San Marino RTV","country":"SM","lang":"it","site":"https://www.sanmarinortv.sm","feed":"https://www.sanmarinortv.sm/news/rss"},
+ {"id":"td-alwihda2","name":"Alwihda Info","country":"TD","lang":"fr","site":"https://www.alwihdainfo.com","feed":"https://www.alwihdainfo.com/feed/"},
+ {"id":"ws-observer2","name":"Samoa Observer","country":"WS","lang":"en","site":"https://www.samoaobserver.ws","feed":"https://www.samoaobserver.ws/rss"},
+ {"id":"ws-talamua2","name":"Talamua","country":"WS","lang":"en","site":"https://talamua.com","feed":"https://talamua.com/rss"},
+ {"id":"bz-amandala2","name":"Amandala","country":"BZ","lang":"en","site":"https://amandala.com.bz","feed":"https://amandala.com.bz/rss"},
+ {"id":"mt-timesofmalta2","name":"Times of Malta","country":"MT","lang":"en","site":"https://timesofmalta.com","feed":"https://timesofmalta.com/rss/articles"},
+ {"id":"mu-lexpress2","name":"L'express Maurice","country":"MU","lang":"fr","site":"https://lexpress.mu","feed":"https://lexpress.mu/feed"},
+ {"id":"vu-dailypost2","name":"Vanuatu Daily Post","country":"VU","lang":"en","site":"https://www.dailypost.vu","feed":"https://www.dailypost.vu/rss"},
+ {"id":"lr-observer2","name":"Daily Observer","country":"LR","lang":"en","site":"https://www.liberianobserver.com","feed":"https://www.liberianobserver.com/rss"},
+ {"id":"lc-loop2","name":"Loop St Lucia","country":"LC","lang":"en","site":"https://stlucia.loopnews.com","feed":"https://stlucia.loopnews.com/rss"},
+ {"id":"fm-mvariety2","name":"Marianas Variety","country":"FM","lang":"en","site":"https://www.mvariety.com","feed":"https://www.mvariety.com/?feed=rss2"},
+ {"id":"sl-awoko2","name":"Awoko","country":"SL","lang":"en","site":"https://awokonewspaper.sl","feed":"https://awokonewspaper.sl/rss"},
+ {"id":"ki-independent2","name":"Kiribati Independent","country":"KI","lang":"en","site":"https://kiribatiindependent.com","feed":"https://kiribatiindependent.com/rss"}
+]
