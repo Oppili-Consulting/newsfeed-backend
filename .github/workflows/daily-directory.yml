@@ -1,0 +1,72 @@
+name: Update outlet list and feeds
+
+# Twice a day so feed discovery converges faster: each run checks another 1,500 outlets.
+on:
+  schedule:
+    - cron: "0 3 * * *"
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Outlets to check for feeds this run"
+        required: false
+        default: "1500"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: directory
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Rebuild the worldwide outlet directory (monthly, or with --force)
+        run: python scripts/build_directory.py --contact "${{ vars.CONTACT_EMAIL || 'oppili-consulting@users.noreply.github.com' }}"
+
+      - name: Find RSS/Atom feeds for outlets that do not have one yet
+        run: |
+          python scripts/discover_feeds.py \
+            --limit "${{ github.event.inputs.limit || 1500 }}" \
+            --contact "${{ vars.CONTACT_EMAIL || 'oppili-consulting@users.noreply.github.com' }}"
+
+      - name: Commit the updated data
+        run: |
+          git config user.name "news-bot"
+          git config user.email "news-bot@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update outlets and feeds"
+            git push
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          d = pathlib.Path("data/directory.json")
+          f = pathlib.Path("data/feeds.json")
+          outlets = len(json.loads(d.read_text())["outlets"]) if d.exists() else 0
+          feeds = json.loads(f.read_text()) if f.exists() else {}
+          live = sum(1 for v in feeds.values() if v.get("feed"))
+          print(f"Directory: {outlets} outlets")
+          print(f"Feeds known: {live}")
+          print("### Outlet directory", file=open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a"))
+          print(f"- {outlets} outlets in the directory", file=open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a"))
+          print(f"- {live} working feeds", file=open(__import__("os").environ["GITHUB_STEP_SUMMARY"], "a"))
+          PY

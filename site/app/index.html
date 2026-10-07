@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1877F2">
+<title>newsfeed — news from outlets worldwide</title>
+<meta name="description" content="A Facebook-style feed of headlines from news outlets in every country, in the languages you choose.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #F0F2F5;
+    --card: #FFFFFF;
+    --text: #1c1e21;
+    --muted: #65676b;
+    --line: #dadde1;
+    --brand: #1877F2;
+    --radius: 12px;
+  }
+  :root[data-theme="dark"] {
+    --bg: #18191A;
+    --card: #242526;
+    --text: #e4e6eb;
+    --muted: #b0b3b8;
+    --line: #3e4042;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--brand); }
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: .5rem .75rem .25rem;
+  }
+  .brandrow { display: flex; align-items: center; gap: .5rem; }
+  h1 { font-size: 1.35rem; margin: 0; color: var(--brand); letter-spacing: -.02em; }
+  .spacer { flex: 1; }
+  button, .chip, select {
+    font: inherit; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 999px; padding: .35rem .8rem;
+  }
+  button.primary { background: var(--brand); color: #fff; border-color: var(--brand); font-weight: 600; }
+  button.link { border: none; background: none; color: var(--brand); padding: .35rem .4rem; }
+  button:focus-visible, .chip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .chips { display: flex; gap: .35rem; overflow-x: auto; padding: .35rem 0 .15rem; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { white-space: nowrap; }
+  .chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+  main { max-width: 42rem; margin: 0 auto; padding: .5rem .75rem 6rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    margin-bottom: .6rem; overflow: hidden;
+  }
+  .card .body { padding: .8rem .9rem; }
+  .who { display: flex; align-items: center; gap: .6rem; }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex: 0 0 38px;
+    background: color-mix(in srgb, var(--brand) 14%, transparent);
+    color: var(--brand); font-weight: 700; display: grid; place-items: center;
+  }
+  .who .name { font-weight: 600; font-size: .95rem; }
+  .who .meta { color: var(--muted); font-size: .78rem; }
+  .headline { font-size: 1.06rem; font-weight: 650; margin: .6rem 0 .25rem; }
+  .snippet { color: var(--muted); font-size: .92rem; margin: 0; }
+  .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--bg); display: block; margin-top: .6rem; border-radius: 8px; }
+  .actions { display: flex; align-items: center; gap: .25rem; margin-top: .5rem; }
+  .tag { font-size: .72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: .1rem .55rem; }
+  .ad {
+    background: var(--card); border: 1px dashed var(--line); border-radius: var(--radius);
+    padding: .6rem .8rem; margin-bottom: .6rem; color: var(--muted); font-size: .78rem;
+  }
+  .ad .box { height: 60px; display: grid; place-items: center; color: var(--muted); }
+  .notice { color: var(--muted); font-size: .82rem; padding: .3rem .1rem; }
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .sheet {
+    position: fixed; inset: 0; z-index: 40; display: none;
+    background: rgba(0,0,0,.45);
+  }
+  .sheet[open], .sheet.on { display: block; }
+  .sheet .panel {
+    position: absolute; inset: auto 0 0 0; max-height: 92vh; overflow: auto;
+    background: var(--card); border-radius: 16px 16px 0 0; padding: 1rem 1rem 2rem;
+  }
+  @media (min-width: 40rem) { .sheet .panel { inset: 5vh auto auto 50%; transform: translateX(-50%); width: 38rem; border-radius: 16px; } }
+  .row { display: flex; align-items: center; gap: .5rem; padding: .35rem 0; border-bottom: 1px solid var(--line); }
+  .row .grow { flex: 1; min-width: 0; }
+  .row .sub { color: var(--muted); font-size: .78rem; }
+  input[type=search], input[type=text] {
+    width: 100%; font: inherit; padding: .5rem .7rem; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  }
+  h2 { font-size: 1rem; margin: 1rem 0 .35rem; }
+  .swatches { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); }
+  .swatch[aria-pressed="true"] { border-color: var(--brand); }
+  footer { max-width: 42rem; margin: 0 auto; padding: 0 .9rem 3rem; color: var(--muted); font-size: .78rem; }
+  .fab {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 30;
+    background: var(--brand); color: #fff; border: none; border-radius: 999px;
+    padding: .8rem 1.1rem; font-weight: 600; box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <h1>newsfeed</h1>
+    <span class="spacer"></span>
+    <button class="link" id="btn-search">Search</button>
+    <button class="link" id="btn-sources">Sources</button>
+    <button class="link" id="btn-settings">Settings</button>
+  </div>
+  <div class="chips" id="modes" role="tablist"></div>
+  <div class="chips" id="tabs"></div>
+  <div class="chips" id="types"></div>
+  <div id="searchwrap" hidden style="padding-bottom:.4rem">
+    <input type="search" id="search" placeholder="Search headlines" aria-label="Search headlines">
+  </div>
+</header>
+
+<main id="feed" aria-live="polite"></main>
+<footer>
+  Headlines, short snippets and links only — every story opens on the outlet's own website.
+  <a href="../privacy.html">Privacy</a> · <a href="../api/index.json">API status</a>
+</footer>
+
+<button class="fab" id="btn-newtab">+ Topic tab</button>
+
+<div class="sheet" id="sheet"><div class="panel" id="panel"></div></div>
+
+<script>
+/* ------------------------------------------------------------------ state */
+const API = new URL('../api/', location.href).href;
+const LS = 'newsfeed.web.v1';
+const defaultState = {
+  countries: [], follow: [], tabs: [], bg: '#F0F2F5', adfree: false,
+  mode: 'all', pick: '', type: 'All', search: ''
+};
+let state = Object.assign({}, defaultState, JSON.parse(localStorage.getItem(LS) || '{}'));
+let outlets = [], posts = [], index = null, counts = {}, lastError = '';
+const save = () => localStorage.setItem(LS, JSON.stringify(state));
+const $ = (id) => document.getElementById(id);
+
+const UN = ('AF AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BY BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA CF TD CL CN CO ' +
+  'KM CG CR CI HR CU CY CZ KP CD DK DJ DM DO EC EG SV GQ ER EE SZ ET FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT ' +
+  'HN HU IS IN ID IR IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MR MU MX ' +
+  'FM MD MC MN ME MA MZ MM NA NR NP NL NZ NI NE NG MK NO OM PK PW PA PG PY PE PH PL PT QA KR RO RU RW KN LC VC WS ' +
+  'SM ST SA SN RS SC SL SG SK SI SB SO ZA SS ES LK SD SR SE CH SY TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE GB US ' +
+  'UY UZ VU VE VN YE ZM ZW').split(' ');
+
+const countryName = (c) => { try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(c) || c; } catch { return c; } };
+const langName = (l) => (!l || l === 'und') ? 'Language not stated' : (() => { try { return new Intl.DisplayNames(['en'], { type: 'language' }).of(l) || l; } catch { return l; } })();
+const flag = (c) => c.length === 2 ? String.fromCodePoint(...[...c.toUpperCase()].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65)) : '';
+const ago = (ts) => {
+  if (!ts) return '';
+  const s = Math.max(1, (Date.now() - ts) / 1000);
+  const u = [[31536000, 'y'], [2592000, 'mo'], [604800, 'w'], [86400, 'd'], [3600, 'h'], [60, 'm']];
+  for (const [sec, label] of u) if (s >= sec) return Math.floor(s / sec) + label + ' ago';
+  return 'just now';
+};
+const esc = (s) => (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ------------------------------------------------------------------- data */
+async function load() {
+  try {
+    const [o, i] = await Promise.all([
+      fetch(API + 'outlets.json').then(r => r.json()),
+      fetch(API + 'index.json').then(r => r.json()).catch(() => null)
+    ]);
+    outlets = o; index = i;
+    counts = outlets.reduce((m, x) => (m[x.country] = (m[x.country] || 0) + 1, m), {});
+  } catch (e) {
+    lastError = 'Could not load the outlet directory (' + e.message + ')';
+    outlets = []; return;
+  }
+  const wanted = state.countries.length ? state.countries : [];
+  const chunks = await Promise.all(wanted.map(async (cc) => {
+    try { return await fetch(API + 'posts/' + cc + '.json').then(r => r.json()); }
+    catch { return []; }
+  }));
+  const byId = Object.fromEntries(outlets.map(o => [o.id, o]));
+  posts = chunks.flat()
+    .map(p => ({ ...p, outlet: byId[p.o] }))
+    .filter(p => p.outlet)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  render();
+}
+
+/* --------------------------------------------------------------- filtering */
+function visible() {
+  const follow = new Set(state.follow);
+  const tab = state.tabs.find(t => t.id === state.pick);
+  return posts.filter(p => {
+    if (follow.size && !follow.has(p.outlet.id)) return false;
+    if (state.type === 'Articles' && p.y !== 'article') return false;
+    if (state.type === 'Photos' && !p.i) return false;
+    if (state.type === 'Videos' && p.y !== 'video') return false;
+    if (state.type === 'Shorts' && p.y !== 'short') return false;
+    if (state.mode === 'country' && state.pick && p.outlet.country !== state.pick) return false;
+    if (state.mode === 'language' && state.pick && p.outlet.lang !== state.pick) return false;
+    if (state.mode === 'mine') {
+      if (!tab) return false;
+      if (tab.countries.length && !tab.countries.includes(p.outlet.country)) return false;
+      if (tab.langs.length && !tab.langs.includes(p.outlet.lang)) return false;
+      if (tab.keyword && !((p.t + ' ' + (p.s || '')).toLowerCase().includes(tab.keyword.toLowerCase()))) return false;
+    }
+    if (state.search) {
+      const hay = (p.t + ' ' + (p.s || '') + ' ' + p.outlet.name).toLowerCase();
+      if (!hay.includes(state.search.toLowerCase())) return false;
+    }
+    return true;
+  });
+}
+
+/* ---------------------------------------------------------------- rendering */
+const MODES = [['all', 'All'], ['country', 'Countries'], ['language', 'Languages'], ['mine', 'My tabs']];
+const TYPES = ['All', 'Articles', 'Photos', 'Videos', 'Shorts'];
+
+function chip(label, pressed, onClick) {
+  const b = document.createElement('button');
+  b.className = 'chip'; b.textContent = label; b.setAttribute('aria-pressed', String(!!pressed));
+  b.onclick = onClick; return b;
+}
+
+function render() {
+  document.documentElement.dataset.theme = (state.bg === '#18191A') ? 'dark' : 'light';
+  document.documentElement.style.setProperty('--bg', state.bg);
+  document.documentElement.style.setProperty('--card', state.bg === '#18191A' ? '#242526' : '#FFFFFF');
+
+  const modes = $('modes'); modes.innerHTML = '';
+  MODES.forEach(([key, label]) => modes.appendChild(chip(label, state.mode === key, () => { state.mode = key; state.pick = ''; save(); render(); })));
+
+  const tabs = $('tabs'); tabs.innerHTML = '';
+  if (state.mode === 'country') {
+    const codes = [...new Set(outlets.filter(o => state.countries.includes(o.country)).map(o => o.country))];
+    if (!codes.length) tabs.appendChild(Object.assign(document.createElement('span'), { className: 'notice', textContent: 'Pick countries in Sources to get country tabs.' }));
+    codes.forEach(c => tabs.appendChild(chip(flag(c) + ' ' + countryName(c), state.pick === c, () => { state.pick = state.pick === c ? '' : c; save(); render(); })));
+  } else if (state.mode === 'language') {
+    const langs = [...new Set(outlets.filter(o => state.countries.includes(o.country)).map(o => o.lang))].filter(Boolean).sort();
+    if (!langs.length) tabs.appendChild(Object.assign(document.createElement('span'), { className: 'notice', textContent: 'Pick countries in Sources to get language tabs.' }));
+    langs.forEach(l => tabs.appendChild(chip(langName(l), state.pick === l, () => { state.pick = state.pick === l ? '' : l; save(); render(); })));
+  } else if (state.mode === 'mine') {
+    state.tabs.forEach(t => tabs.appendChild(chip(t.name, state.pick === t.id, () => { state.pick = state.pick === t.id ? '' : t.id; save(); render(); })));
+    tabs.appendChild(chip('+ New tab', false, newTab));
+  }
+
+  const types = $('types'); types.innerHTML = '';
+  TYPES.forEach(t => types.appendChild(chip(t, state.type === t, () => { state.type = t; save(); render(); })));
+
+  const list = visible();
+  const feed = $('feed');
+  feed.innerHTML = '';
+  if (lastError) feed.appendChild(Object.assign(document.createElement('p'), { className: 'notice', textContent: lastError }));
+  if (index) feed.appendChild(Object.assign(document.createElement('p'), {
+    className: 'notice',
+    textContent: index.outlets + ' outlets worldwide · ' + index.live + ' with a live feed · ' + index.posts + ' stories · updated ' + ago(index.generated * 1000)
+  }));
+  if (!state.countries.length) {
+    feed.innerHTML += '<div class="empty"><h2>Choose your countries</h2><p>Open <strong>Sources</strong> to pick any of the 193 UN countries, then narrow by language or outlet. Nothing is filtered out for you.</p><button class="primary" onclick="openSources()">Open Sources</button></div>';
+    return;
+  }
+  if (!list.length) {
+    feed.innerHTML += '<div class="empty"><h2>Nothing matches this view</h2><p>Try another tab, clear the search, or follow more outlets in Sources.</p></div>';
+    return;
+  }
+  list.slice(0, 400).forEach((p, i) => {
+    feed.insertAdjacentHTML('beforeend', cardHTML(p));
+    if (!state.adfree && (i + 1) % 4 === 0) {
+      feed.insertAdjacentHTML('beforeend', '<div class="ad"><strong>Ad</strong> · Sponsored<div class="box">AdMob banner slot</div></div>');
+    }
+  });
+  if (list.length > 400) feed.insertAdjacentHTML('beforeend', '<p class="notice">Showing the first 400 of ' + list.length + ' stories.</p>');
+}
+
+function cardHTML(p) {
+  const img = p.i ? '<img class="thumb" loading="lazy" src="' + esc(p.i) + '" alt="" onerror="this.remove()">' : '';
+  const tag = p.y === 'short' ? 'Short' : p.y === 'video' ? 'Video' : (p.i ? 'Photo' : 'Article');
+  return '<article class="card"><div class="body">' +
+    '<div class="who"><div class="avatar">' + esc(p.outlet.name.slice(0, 1).toUpperCase()) + '</div>' +
+    '<div><div class="name">' + esc(p.outlet.name) + '</div>' +
+    '<div class="meta">' + flag(p.outlet.country) + ' ' + esc(countryName(p.outlet.country)) + ' · ' + esc(langName(p.outlet.lang)) + ' · ' + ago(p.ts) + '</div></div></div>' +
+    '<h3 class="headline">' + esc(p.t) + '</h3>' +
+    (p.s ? '<p class="snippet">' + esc(p.s) + '</p>' : '') + img +
+    '<div class="actions"><span class="tag">' + tag + '</span><span class="spacer" style="flex:1"></span>' +
+    '<button class="link" onclick="share(this)" data-title="' + esc(p.t) + '" data-url="' + esc(p.l) + '">Share</button>' +
+    '<a class="link" style="text-decoration:none" href="' + esc(p.l) + '" target="_blank" rel="noopener">' + (p.y === 'article' ? 'Read' : 'Watch') + '</a>' +
+    '</div></div></article>';
+}
+
+function share(el) {
+  const text = el.dataset.title + '\n' + el.dataset.url;
+  if (navigator.share) navigator.share({ title: el.dataset.title, url: el.dataset.url }).catch(() => {});
+  else { navigator.clipboard?.writeText(text); el.textContent = 'Copied'; setTimeout(() => (el.textContent = 'Share'), 1200); }
+}
+
+/* ----------------------------------------------------------------- sheets */
+function openSheet(html) { $('panel').innerHTML = html; $('sheet').classList.add('on'); }
+function closeSheet() { $('sheet').classList.remove('on'); }
+$('sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet') closeSheet(); });
+window.openSources = openSources;
+
+function openSources() {
+  const q = '';
+  openSheet(`
+    <h2>Sources</h2>
+    <p class="sub" style="color:var(--muted);font-size:.82rem">Every one of the 193 UN countries, every language and every outlet is selectable. Nothing is hidden or ranked down.</p>
+    <p><strong>Countries (${state.countries.length} of ${UN.length})</strong> · outlets followed: ${state.follow.length}</p>
+    <input type="search" id="cq" placeholder="Search countries">
+    <p><button class="link" onclick="selectAll()">Select all</button><button class="link" onclick="clearAll()">Clear</button></p>
+    <div id="clist" style="max-height:38vh;overflow:auto"></div>
+    <h2>Outlets</h2>
+    <p><button class="link" onclick="followAll(true)">Follow all</button><button class="link" onclick="followAll(false)">Unfollow all</button></p>
+    <input type="search" id="oq" placeholder="Search outlets">
+    <div id="olist" style="max-height:38vh;overflow:auto"></div>
+    <p style="margin-top:1rem"><button class="primary" onclick="closeSheet()">Done</button></p>
+  `);
+  const drawC = () => {
+    const qv = $('cq').value.toLowerCase();
+    $('clist').innerHTML = UN.filter(c => !qv || countryName(c).toLowerCase().includes(qv) || c.toLowerCase() === qv)
+      .sort((a, b) => countryName(a).localeCompare(countryName(b)))
+      .map(c => `<div class="row"><input type="checkbox" ${state.countries.includes(c) ? 'checked' : ''} onchange="toggleCountry('${c}')">
+        <div class="grow"><div>${flag(c)} ${countryName(c)}</div><div class="sub">${counts[c] || 0} outlets</div></div></label></div>`).join('');
+  };
+  const drawO = () => {
+    const qv = $('oq').value.toLowerCase();
+    const sel = outlets.filter(o => state.countries.includes(o.country));
+    $('olist').innerHTML = sel.filter(o => !qv || o.name.toLowerCase().includes(qv) || o.site.toLowerCase().includes(qv))
+      .slice(0, 500)
+      .map(o => `<div class="row"><input type="checkbox" ${state.follow.includes(o.id) ? 'checked' : ''} onchange="toggleOutlet('${o.id}')">
+        <div class="grow"><div>${esc(o.name)}</div><div class="sub">${flag(o.country)} ${countryName(o.country)} · ${langName(o.lang)} · ${o.live ? 'live' : 'feed pending'}</div></div></div>`).join('')
+      || '<p class="notice">Pick countries above to see their outlets.</p>';
+  };
+  $('cq').oninput = drawC; $('oq').oninput = drawO; drawC(); drawO();
+}
+function toggleCountry(c) {
+  const on = !state.countries.includes(c);
+  state.countries = on ? [...state.countries, c] : state.countries.filter(x => x !== c);
+  const ids = outlets.filter(o => o.country === c).map(o => o.id);
+  state.follow = on ? [...new Set([...state.follow, ...ids])] : state.follow.filter(i => !ids.includes(i));
+  save(); load();
+}
+function toggleOutlet(id) {
+  state.follow = state.follow.includes(id) ? state.follow.filter(x => x !== id) : [...state.follow, id];
+  save(); render();
+}
+function selectAll() {
+  state.countries = [...UN];
+  state.follow = outlets.map(o => o.id);
+  save(); closeSheet(); load();
+}
+function clearAll() { state.countries = []; state.follow = []; save(); closeSheet(); load(); }
+function followAll(on) {
+  const ids = outlets.filter(o => state.countries.includes(o.country)).map(o => o.id);
+  state.follow = on ? [...new Set([...state.follow, ...ids])] : state.follow.filter(i => !ids.includes(i));
+  save(); openSources(); render();
+}
+
+function newTab() {
+  const countries = [...new Set(outlets.filter(o => state.countries.includes(o.country)).map(o => o.country))];
+  const langs = [...new Set(outlets.filter(o => state.countries.includes(o.country)).map(o => o.lang))];
+  openSheet(`
+    <h2>New topic tab</h2>
+    <p class="sub" style="color:var(--muted);font-size:.82rem">Example: Australia + English + “RBA” gives you central-bank news only.</p>
+    <input type="text" id="tname" placeholder="Tab name">
+    <p><input type="text" id="tkw" placeholder="Keyword (optional)"></p>
+    <p><strong>Countries</strong> (none selected = all your countries)</p>
+    <div class="chips" id="tc"></div>
+    <p><strong>Languages</strong></p>
+    <div class="chips" id="tl"></div>
+    <p style="margin-top:1rem"><button class="primary" onclick="createTab()">Create</button> <button class="link" onclick="closeSheet()">Cancel</button></p>
+  `);
+  const chosen = { c: [], l: [] };
+  countries.forEach(c => $('tc').appendChild(chip(countryName(c), false, (e) => {
+    const on = !chosen.c.includes(c);
+    chosen.c = on ? [...chosen.c, c] : chosen.c.filter(x => x !== c);
+    e.target.setAttribute('aria-pressed', String(on));
+  })));
+  langs.forEach(l => $('tl').appendChild(chip(langName(l), false, (e) => {
+    const on = !chosen.l.includes(l);
+    chosen.l = on ? [...chosen.l, l] : chosen.l.filter(x => x !== l);
+    e.target.setAttribute('aria-pressed', String(on));
+  })));
+  window.createTab = () => {
+    const name = $('tname').value.trim() || $('tkw').value.trim() || 'My tab';
+    state.tabs.push({ id: 't' + Date.now(), name, countries: chosen.c, langs: chosen.l, keyword: $('tkw').value.trim() });
+    state.mode = 'mine'; state.pick = state.tabs[state.tabs.length - 1].id;
+    save(); closeSheet(); render();
+  };
+}
+
+function openSettings() {
+  const presets = [['Light grey', '#F0F2F5'], ['White', '#FFFFFF'], ['Sky', '#DCECFF'], ['Mint', '#DEF5EA'], ['Peach', '#FFEADB'], ['Lilac', '#EBE4FA'], ['Dark', '#18191A']];
+  openSheet(`
+    <h2>Settings</h2>
+    <p><strong>Background</strong></p>
+    <div class="swatches">${presets.map(([n, h]) => `<button class="swatch" title="${n}" style="background:${h}" aria-pressed="${state.bg === h}" onclick="setBg('${h}')"></button>`).join('')}</div>
+    <p><input type="text" id="hex" placeholder="#101820" value="${state.bg}"> <button onclick="setBg($('hex').value)">Apply</button></p>
+    <h2>Ads</h2>
+    <p class="sub" style="color:var(--muted);font-size:.85rem">The Android app shows AdMob ads and offers a one-time ad-free purchase. This web preview only shows labelled placeholders.</p>
+    <p><label><input type="checkbox" ${state.adfree ? 'checked' : ''} onchange="state.adfree=this.checked;save();render()"> Hide ad placeholders</label></p>
+    <h2>Data</h2>
+    <p class="sub" style="color:var(--muted);font-size:.85rem">Preferences are stored in this browser only. The app stores them on the device.</p>
+    <p><button onclick="localStorage.removeItem('${LS}');location.reload()">Reset everything</button></p>
+    <p><a href="../privacy.html">Privacy policy</a> · <a href="../api/index.json">API status</a></p>
+    <p style="margin-top:1rem"><button class="primary" onclick="closeSheet()">Done</button></p>
+  `);
+}
+window.setBg = (h) => {
+  h = (h || '').trim(); if (!/^#?[0-9a-fA-F]{6}$/.test(h)) return;
+  state.bg = h.startsWith('#') ? h : '#' + h; save(); render(); openSettings();
+};
+
+/* ------------------------------------------------------------------- wire */
+$('btn-sources').onclick = openSources;
+$('btn-settings').onclick = openSettings;
+$('btn-newtab').onclick = () => { state.mode = 'mine'; save(); render(); newTab(); };
+$('btn-search').onclick = () => { const w = $('searchwrap'); w.hidden = !w.hidden; if (!w.hidden) $('search').focus(); };
+$('search').oninput = (e) => { state.search = e.target.value; render(); };
+
+load();
+</script>
+</body>
+</html>
