@@ -1,0 +1,41 @@
+name: API health check
+
+# The brief listed "no health dashboard" as a gap. This runs check_api.py against the
+# published site: it fails loudly if the JSON stops matching what the app expects, if the
+# data goes stale, or if a country's posts file disappears.
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_run:
+    workflows: ["Refresh news posts"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Check the published API
+        run: |
+          for attempt in 1 2 3 4 5; do
+            echo "attempt $attempt"
+            if python scripts/check_api.py --sample 20; then
+              exit 0
+            fi
+            sleep 60
+          done
+          echo "::error::the published API did not pass its contract check"
+          exit 1
