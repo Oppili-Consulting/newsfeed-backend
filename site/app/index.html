@@ -196,6 +196,16 @@ async function load() {
   render();
 }
 
+/* The server rebuilds the API every 15 minutes; pick changes up without a manual reload.
+   The Android app does better than this: it can also read the outlets' feeds directly. */
+setInterval(async () => {
+  if (document.hidden || !state.countries.length) return;
+  try {
+    const i = await fetch(API + 'index.json', { cache: 'no-store' }).then(r => r.json());
+    if (!index || i.generated !== index.generated) await load();
+  } catch { /* offline: keep what is on screen */ }
+}, 120000);
+
 /* --------------------------------------------------------------- filtering */
 function visible() {
   const follow = new Set(state.follow);
