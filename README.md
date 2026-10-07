@@ -34,12 +34,22 @@ for a country the user selected.
 ## Setup (already done for this repository)
 
 1. Public repository `newsfeed-backend`.
-2. **Settings → Pages → Source: GitHub Actions.**
+2. **Settings → Pages → Source: GitHub Actions.** This one switch has to be flipped by the
+   repository owner: the workflow token is not allowed to create the Pages site itself
+   (`configure-pages` reports *Resource not accessible by integration*). Until it is enabled,
+   the posts workflow fails at the deploy step and the API is not reachable.
 3. Optional: set a repository variable `CONTACT_EMAIL` (Settings → Secrets and variables → Actions →
    Variables) so feed owners can contact you. The scripts fall back to the repository owner's
    GitHub address.
 4. **Actions → Update outlet list and feeds → Run workflow** to rebuild the directory and find more
    feeds. **Actions → Refresh news posts → Run workflow** to publish the API.
+
+## Current contents
+
+The most recent build produced **6,122 outlets across 165 countries and 96 languages**, of which
+**674 have a working feed**, yielding **5,452 stories from 70 countries**. `python scripts/check_api.py`
+verifies the published files against the contract above and is run daily by the *API health check*
+workflow.
 
 ## Honest limits
 
