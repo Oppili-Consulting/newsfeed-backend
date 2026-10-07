@@ -49,10 +49,19 @@ jobs:
           git add data
           if git diff --cached --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "Update outlets and feeds"
-            git push
+            exit 0
           fi
+          git commit -m "Update outlets and feeds"
+          # Another commit may have landed while this job was running, so rebase and retry.
+          for attempt in 1 2 3; do
+            if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push; then
+              echo "Pushed the updated data on attempt $attempt"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::could not push the updated data"
+          exit 1
 
       - name: Summary
         if: always()
