@@ -84,7 +84,13 @@ def host_of(url: str) -> str:
     return urlparse(url).netloc.lower().removeprefix("www.")
 
 
-def ask(query: str, session: requests.Session, timeout: int = 150, tries: int = 3):
+# WDQS cuts a query off at 60 seconds, so waiting much longer than that only delays the
+# split-and-retry path. Two attempts per batch is enough: splitting is the better retry.
+QUERY_TIMEOUT = 90
+QUERY_TRIES = 2
+
+
+def ask(query: str, session: requests.Session, timeout: int = QUERY_TIMEOUT, tries: int = QUERY_TRIES):
     """Run one SPARQL query; return bindings, or None when every attempt failed."""
     for attempt in range(tries):
         try:
