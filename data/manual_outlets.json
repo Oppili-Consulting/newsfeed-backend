@@ -290,14 +290,6 @@
   "feed": "https://www.myjoyonline.com/feed/"
  },
  {
-  "id": "scmp",
-  "name": "South China Morning Post",
-  "country": "HK",
-  "lang": "en",
-  "site": "https://www.scmp.com",
-  "feed": "https://www.scmp.com/rss/91/feed"
- },
- {
   "id": "rte",
   "name": "RTÉ News",
   "country": "IE",

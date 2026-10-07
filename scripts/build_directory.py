@@ -131,16 +131,22 @@ def fetch(codes, qids, types, limit, session, depth=0):
 
 
 def absorb(found: dict, bindings, qid2code) -> int:
-    """Merge SPARQL bindings into the found map keyed by (country, host)."""
+    """Merge SPARQL bindings into the found map, keyed by Wikidata item id.
+
+    Keying by item id matters: an item can carry several websites (P856) or several
+    countries (P17), which produces one SPARQL row per combination. Keying by country and
+    host instead would list the same outlet two or three times with the same id.
+    """
     added = 0
     for b in bindings:
         try:
             name = b["itemLabel"]["value"].strip()
             site = normalise_site(b["site"]["value"])
             cc = qid2code.get(b["c"]["value"].rsplit("/", 1)[-1], "")
+            item = b["item"]["value"].rsplit("/", 1)[-1]
         except (KeyError, AttributeError):
             continue
-        if not site or cc not in UN:
+        if not site or cc not in UN or not item:
             continue
         if re.fullmatch(r"Q\d+", name):  # no usable label
             continue
@@ -150,13 +156,12 @@ def absorb(found: dict, bindings, qid2code) -> int:
         lang = ((b.get("lang") or {}).get("value") or "").strip().lower()[:2]
         if not re.fullmatch(r"[a-z]{2}", lang):
             lang = ""
-        key = (cc, host)
-        if key in found:
-            if not found[key]["lang"] and lang:
-                found[key]["lang"] = lang
+        if item in found:
+            if not found[item]["lang"] and lang:
+                found[item]["lang"] = lang
             continue
-        found[key] = {
-            "id": "wd" + b["item"]["value"].rsplit("/", 1)[-1],
+        found[item] = {
+            "id": "wd" + item,
             "name": name,
             "country": cc,
             "lang": lang,
@@ -218,19 +223,40 @@ def main() -> None:
                     flush=True,
                 )
 
-    # Hand-curated outlets win over Wikidata entries for the same country+host.
+    # Hand-curated outlets win over Wikidata entries for the same country and host.
     manual = json.loads(MANUAL.read_text()) if MANUAL.exists() else []
+    manual_ids, skipped = set(), []
     for m in manual:
-        site = normalise_site(m.get("site", ""))
-        if site:
-            m = {**m, "site": site}
-        found[(m["country"], host_of(site or m.get("feed", "")))] = m
-    print(f"Manual outlets merged: {len(manual)}", flush=True)
+        if m.get("country") not in UN:
+            skipped.append(f"{m.get('name')} ({m.get('country')})")
+            continue
+        site = normalise_site(m.get("site", "")) or normalise_site(m.get("feed", ""))
+        m = {**m, "site": site}
+        manual_ids.add(m["id"])
+        found[m["id"]] = m
+    print(f"Manual outlets merged: {len(manual) - len(skipped)}", flush=True)
+    if skipped:
+        print(f"  skipped {len(skipped)} curated outlets outside the 193 UN countries: {', '.join(skipped)}")
 
     if not found:
         sys.exit("No outlets found and no manual outlets; keeping the old directory.")
 
-    outlets = sorted(found.values(), key=lambda o: (o["country"], o["name"].lower()))
+    # One row per outlet: curated entries claim their host first, then everything else.
+    outlets, seen_hosts = [], set()
+    ordered = sorted(
+        found.values(), key=lambda o: (o["id"] not in manual_ids, o["country"], o["name"].lower())
+    )
+    for o in ordered:
+        key = (o["country"], host_of(o["site"]))
+        if key in seen_hosts:
+            continue
+        seen_hosts.add(key)
+        outlets.append(o)
+    outlets.sort(key=lambda o: (o["country"], o["name"].lower()))
+
+    duplicates = len(outlets) - len({o["id"] for o in outlets})
+    if duplicates:
+        sys.exit(f"Refusing to publish: {duplicates} duplicate outlet ids")
     OUT.write_text(json.dumps({"generated": time.time(), "outlets": outlets}, ensure_ascii=False, separators=(",", ":")))
     countries = {o["country"] for o in outlets}
     print(f"Saved {len(outlets)} outlets across {len(countries)} countries -> {OUT}")
