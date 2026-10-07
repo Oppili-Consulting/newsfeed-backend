@@ -34,7 +34,11 @@ jobs:
       - name: Read every feed and write the JSON API
         run: python scripts/fetch_posts.py --contact "${{ vars.CONTACT_EMAIL || 'oppili-consulting@users.noreply.github.com' }}"
 
+      # enablement: true lets the workflow turn GitHub Pages on by itself the first
+      # time it runs, so no manual trip to Settings is needed.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
