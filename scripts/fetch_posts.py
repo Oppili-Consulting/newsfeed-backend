@@ -105,12 +105,19 @@ def main() -> None:
     ap.add_argument("--per-outlet", type=int, default=10, help="newest N entries read per feed")
     ap.add_argument("--max-age-days", type=int, default=45)
     ap.add_argument("--limit-outlets", type=int, default=0, help="only the first N outlets (0 = all)")
+    ap.add_argument(
+        "--only-curated",
+        action="store_true",
+        help="only outlets that already carry a feed/YouTube id (fast smoke test)",
+    )
     ap.add_argument("--contact", default="set-your-email@example.com")
     args = ap.parse_args()
 
     directory = json.loads((ROOT / "data" / "directory.json").read_text())["outlets"]
     feeds_path = ROOT / "data" / "feeds.json"
     feeds = json.loads(feeds_path.read_text()) if feeds_path.exists() else {}
+    if args.only_curated:
+        directory = [o for o in directory if o.get("feed") or o.get("yt")]
     if args.limit_outlets:
         directory = directory[: args.limit_outlets]
 
