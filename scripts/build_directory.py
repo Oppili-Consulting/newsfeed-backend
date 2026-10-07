@@ -171,9 +171,45 @@ def absorb(found: dict, bindings, qid2code) -> int:
     return added
 
 
+YT_QUERY = """SELECT ?item ?yt WHERE {{
+  ?item wdt:P31 wd:{t} ; wdt:P2397 ?yt .
+}}"""
+
+
+def refresh_youtube(session: requests.Session, outlets: list) -> int:
+    """Fill in YouTube channel ids for outlets already in the directory.
+
+    Requiring P2397 keeps the result set tiny (a few thousand rows in seconds), so this can run
+    far more often than the full country-by-country rebuild. Only outlets we already carry are
+    updated, which keeps the directory keyed to real news organisations with a website.
+    """
+    known = {o["id"][2:]: o for o in outlets if o["id"].startswith("wd")}
+    added = 0
+    for t in TYPES:
+        rows = ask(YT_QUERY.format(t=t), session, timeout=90, tries=2)
+        if not rows:
+            print(f"  no rows for {t}", flush=True)
+            continue
+        hits = 0
+        for b in rows:
+            try:
+                qid = b["item"]["value"].rsplit("/", 1)[-1]
+                channel = b["yt"]["value"].strip()
+            except (KeyError, AttributeError):
+                continue
+            o = known.get(qid)
+            if o and channel and o.get("yt") != channel:
+                o["yt"] = channel
+                added += 1
+                hits += 1
+        print(f"  {t}: {len(rows)} channels, {hits} matched our outlets", flush=True)
+    return added
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true", help="rebuild even if the directory is fresh")
+    ap.add_argument("--youtube-only", action="store_true", help="only refresh YouTube channel ids")
     ap.add_argument("--types", default=",".join(TYPES), help="comma-separated Wikidata type ids")
     ap.add_argument("--limit", type=int, default=20000, help="row limit per query")
     ap.add_argument("--batch", type=int, default=4, help="countries per query")
@@ -183,7 +219,7 @@ def main() -> None:
 
     types = [t.strip() for t in args.types.split(",") if t.strip()]
 
-    if OUT.exists() and not args.force:
+    if OUT.exists() and not args.force and not args.youtube_only:
         try:
             if time.time() - json.loads(OUT.read_text())["generated"] < 30 * 86400:
                 print("Directory is fresh, skipping. Use --force to rebuild.")
@@ -198,6 +234,19 @@ def main() -> None:
             "Accept": "application/sparql-results+json",
         }
     )
+
+    if args.youtube_only:
+        if not OUT.exists():
+            sys.exit("No directory to update yet; run a full build first.")
+        blob = json.loads(OUT.read_text())
+        print("Refreshing YouTube channel ids...", flush=True)
+        added = refresh_youtube(session, blob["outlets"])
+        # The directory's own date stays untouched so a full rebuild is still due on schedule.
+        blob["youtube_updated"] = int(time.time())
+        OUT.write_text(json.dumps(blob, ensure_ascii=False, separators=(",", ":")))
+        total = sum(1 for o in blob["outlets"] if o.get("yt"))
+        print(f"YouTube channels set for {added} outlets ({total} known in total)")
+        return
 
     print("Resolving country codes to Wikidata items...", flush=True)
     rows = ask(COUNTRY_MAP_QUERY, session, timeout=60) or []

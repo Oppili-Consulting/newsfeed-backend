@@ -72,10 +72,6 @@ def pull(job, session: requests.Session, max_age_ms: int, per_outlet: int):
         ts = int(calendar.timegm(stamp) * 1000) if stamp else 0
         if ts and now - ts > max_age_ms:
             continue
-        if is_yt:
-            kind = "short" if "/shorts/" in link else "video"
-        else:
-            kind = "video" if "/video/" in link or "/watch?v=" in link else "article"
         img = ""
         thumbs = entry.get("media_thumbnail") or []
         if thumbs and isinstance(thumbs, list):
@@ -85,11 +81,46 @@ def pull(job, session: requests.Session, max_age_ms: int, per_outlet: int):
                 if str(enc.get("type", "")).startswith("image/"):
                     img = enc.get("href", "") or enc.get("url", "")
                     break
+
+        # Decide what the item actually is from its own metadata first, then fall back to the URL.
+        # Media RSS carries medium/type and often a duration, which is the only way to tell a
+        # short clip from a full video without calling an API.
+        duration, video_media = 0, False
+        for m in entry.get("media_content") or []:
+            if not isinstance(m, dict):
+                continue
+            try:
+                duration = max(duration, int(float(m.get("duration") or 0)))
+            except (TypeError, ValueError):
+                pass
+            if str(m.get("medium", "")) == "video" or str(m.get("type", "")).startswith("video/"):
+                video_media = True
+        video_enc = any(
+            str(e.get("type", "")).startswith("video/") for e in (entry.get("enclosures") or [])
+        )
+        is_video = (
+            is_yt
+            or video_media
+            or video_enc
+            or "/shorts/" in link
+            or "/watch?v=" in link
+            or "/video/" in link
+            or "/videos/" in link
+        )
+        is_gallery = any(k in link for k in ("/gallery", "/photos", "/photo/", "/pictures"))
+        summary = clean(entry.get("summary", "") or entry.get("description", ""))[:220]
+        if is_video:
+            kind = "short" if ("/shorts/" in link or 0 < duration <= 90) else "video"
+        elif is_gallery and img:
+            # "photo" means an image-led story, not merely an article that happens to have artwork.
+            kind = "photo"
+        else:
+            kind = "article"
         out.append(
             {
                 "o": outlet["id"],
                 "t": title[:200],
-                "s": clean(entry.get("summary", "") or entry.get("description", ""))[:220],
+                "s": summary,
                 "l": link,
                 "ts": ts,
                 "y": kind,
@@ -124,6 +155,9 @@ def main() -> None:
     jobs, live = [], set()
     for o in directory:
         feed = o.get("feed") or (feeds.get(o["id"]) or {}).get("feed")
+        # Keep the resolved feed on the outlet: the app uses it to pull directly from the source
+        # when the reader asks for a live refresh.
+        o["feed"] = feed or ""
         if not o.get("lang"):
             o["lang"] = (feeds.get(o["id"]) or {}).get("lang") or "und"
         if feed:
@@ -177,6 +211,8 @@ def main() -> None:
                 "country": o["country"],
                 "lang": o["lang"],
                 "site": o.get("site", ""),
+                "feed": o.get("feed", ""),
+                "yt": o.get("yt", ""),
                 "live": o["id"] in live,
             }
         )

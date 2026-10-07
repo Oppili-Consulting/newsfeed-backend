@@ -129,7 +129,7 @@ def main() -> None:
             if len(p["s"]) > 220 or len(p["t"]) > 200:
                 issues.append("a snippet or headline exceeds the documented length")
                 break
-            if p["y"] not in ("article", "video", "short"):
+            if p["y"] not in ("article", "video", "short", "photo"):
                 issues.append(f"unknown post type {p['y']}")
                 break
             if p["ts"] and previous is not None and p["ts"] > previous:

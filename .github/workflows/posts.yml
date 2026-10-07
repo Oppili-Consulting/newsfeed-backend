@@ -2,7 +2,10 @@ name: Refresh news posts
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Public repositories get unlimited Actions minutes, so the feed can be rebuilt often.
+    # GitHub's scheduler can lag under load, so fifteen minutes is a reliable target rather
+    # than a guarantee; the app also reads feeds directly on the device when asked to.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:

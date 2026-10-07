@@ -42,6 +42,11 @@ jobs:
             --limit "${{ github.event.inputs.limit || 1500 }}" \
             --contact "${{ vars.CONTACT_EMAIL || 'oppili-consulting@users.noreply.github.com' }}"
 
+      # Cheap and independent of the full rebuild: people add YouTube channels far more often
+      # than they add websites, and the channel feed is what carries video and Shorts.
+      - name: Refresh YouTube channels for known outlets
+        run: python scripts/build_directory.py --youtube-only --contact "${{ vars.CONTACT_EMAIL || 'oppili-consulting@users.noreply.github.com' }}"
+
       - name: Commit the updated data
         run: |
           git config user.name "news-bot"
