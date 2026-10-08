@@ -142,8 +142,11 @@
 /* ------------------------------------------------------------------ state */
 const API = new URL('../api/', location.href).href;
 const LS = 'newsfeed.web.v1';
+// A first-time visitor starts with three countries already picked, the same way the Android
+// app's first-run screen pre-selects them, so the feed is never an empty page on arrival.
+// Anything the visitor then changes is stored and wins over these defaults.
 const defaultState = {
-  countries: [], follow: [], tabs: [], bg: '#F0F2F5', adfree: false,
+  countries: ['AU', 'GB', 'US'], follow: [], tabs: [], bg: '#F0F2F5', adfree: false,
   mode: 'all', pick: '', type: 'All', search: ''
 };
 let state = Object.assign({}, defaultState, JSON.parse(localStorage.getItem(LS) || '{}'));
